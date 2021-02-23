@@ -1,25 +1,8 @@
-# my-project02
+# 旅游博客网站(前端)
 
-## Project setup
-```
-yarn install
-```
+## 技术：
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
-
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
-"# vue_tourist-project" 
+- 使用Vue全家桶+ES6++Webpack+Axios等前端最新最热的技术
+- 前后端分离，使用mockjs模拟数据
+- 包括首页，各旅游地区页面，相关博客信息页面
+- 采用模块化、组件化、工程化的模式开发
