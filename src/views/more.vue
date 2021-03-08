@@ -26,41 +26,29 @@
       v-model:current="current"
       :total="data[which].length"
       :pageSize="pageSize"
-      @change="a"
       show-less-items
     />
   </div>
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { useStore } from "vuex";
 import BlogBanner from "../components/BlogBanner/BlogBanner.vue";
 
 import { GET_COUNTRYINFO } from "@/store/types";
 
-import { defineComponent, ref, watch } from "vue";
+import {
+  defineComponent,
+  ref,
+  reactive,
+  computed,
+  onMounted,
+  watch,
+  onBeforeUnmount,
+  toRefs,
+} from "vue";
 
 export default defineComponent({
-  setup() {
-    const pageSize = ref(6);
-    const current = ref(1);
-
-    const onShowSizeChange = (current, pageSize) => {
-      alert(current);
-    };
-
-    watch(pageSize, () => {
-      console.log("pageSize", pageSize.value);
-    });
-    watch(current, () => {
-      console.log("current..", current.value);
-    });
-    return {
-      pageSize,
-      current,
-      onShowSizeChange,
-    };
-  },
   props: {
     country: {
       type: String,
@@ -72,18 +60,16 @@ export default defineComponent({
   components: {
     BlogBanner,
   },
-  data() {
-    return {
-      watchCurrent: 1,
-    };
-  },
-  computed: {
-    ...mapState({
-      data: (state) => state.area.data,
-    }),
-    newArr() {
-      if (this.data[this.which]) {
-        let arr = this.data[this.which];
+  setup(props) {
+    const store = useStore();
+    const { country, which } = toRefs(props);
+    const watchCurrent = ref(1);
+    const pageSize = ref(6);
+    const current = ref(1);
+    const data = computed(() => store.state.area.data);
+    const newArr = computed(() => {
+      if (data.value[which.value]) {
+        let arr = data.value[which.value];
         let newArr = [];
         let newArr1 = [];
         arr.forEach((element) => {
@@ -95,50 +81,44 @@ export default defineComponent({
         }
         return newArr;
       }
-    },
-  },
-  //生命周期 - 创建完成（访问当前this实例）
-  created() {},
-  //生命周期 - 挂载完成（访问DOM元素）
-  async mounted() {
-    let result = JSON.parse(sessionStorage.getItem("which"));
-    console.log("result", result);
-    if (result && result.name == this.country) {
-      this.$store.commit(GET_COUNTRYINFO, result);
-    } else {
-      await this.$store.dispatch("getCountry", this.country);
-    }
-    window.addEventListener("unload", () => {
-      //将最新的shopData存入sessionStorage
-      sessionStorage.setItem("which", JSON.stringify(this.newArr));
     });
-  },
-  watch: {
-    "$route.params.which": {
-      deep: true,
-      handler: function (item) {
-        console.log("item", item);
-      },
-    },  
-    current(newValue) {
-      this.watchCurrent = newValue;
-    },
-  },
- 
-  // beforeRouteEnter(to, from, next) {
-  //   console.log("to", to.params.which);
-  //   next();
-  // },
-  // 路由改变前，组件就已经渲染完了
-  // 逻辑稍稍不同
-
-  beforeUnmount() {
-    sessionStorage.setItem("which", JSON.stringify(this.newArr));
+    watch(current, (newValue) => {
+      watchCurrent.value = newValue;
+    });
+    onMounted(async () => {
+      let result = JSON.parse(sessionStorage.getItem("which"));
+      console.log("result", result);
+      if (result && result.name == country.value) {
+        store.commit(GET_COUNTRYINFO, result);
+      } else {
+        await store.dispatch("getCountry", country.value);
+      }
+      window.addEventListener("unload", () => {
+        //将最新的shopData存入sessionStorage
+        sessionStorage.setItem("which", JSON.stringify(newArr.value));
+      });
+    });
+    onBeforeUnmount(() => {
+      sessionStorage.setItem("which", JSON.stringify(newArr.value));
+    });
+    return reactive({
+      pageSize,
+      current,
+      watchCurrent,
+      data,
+      newArr,
+    });
   },
 });
 </script>
 <style scoped lang="css" rel="stylesheet/css">
 /* @import url(); 引入css类 */
+p {
+  margin-bottom: 0;
+}
+ul li img {
+  object-fit: cover;
+}
 .my-div {
   position: relative;
   margin-bottom: 100px;

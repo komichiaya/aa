@@ -39,46 +39,49 @@
 </template>
 
 <script>
-export default {
+import { computed, defineComponent, watch, toRefs, reactive, ref } from "vue";
+import { useRoute } from "vue-router";
+export default defineComponent({
   props: {
     list: {
       type: Array,
     },
   },
-  data() {
-    return {
-      newParams: {},
-      newList: [],
-    };
-  },
-  computed: {
-    isShow() {
-      const { country, id } = this.newParams;
+  setup(props) {
+    const route = useRoute();
+    const { list } = toRefs(props);
+    const newParams = ref({});
+    const newList = ref([]);
+
+    const isShow = computed(() => {
+      const { country, id } = newParams.value;
       return country && id ? false : true;
-    },
-    title() {
-      const { country } = this.newParams;
-      const newList = this;
+    });
+    watch(
+      () => route.params,
+      (newValue) => {
+        newParams.value = newValue;
+      }
+    );
+    watch(list, (newV) => {
+      newList.value = newV.value;
+    });
+    const title = computed(() => {
+      const { country } = newParams.value;
       if (country && newList.list) {
         let result = newList.list.find((item) => item.name == country);
         return result;
       }
-    },
+    });
+
+    return reactive({
+      newParams,
+      newList,
+      isShow,
+      title,
+    });
   },
-  //生命周期 - 创建完成（访问当前this实例）
-  created() {},
-  //生命周期 - 挂载完成（访问DOM元素）
-  mounted() {},
-  watch: {
-    "$route.params": function (newV) {
-      this.newParams = newV;
-    },
-    list: function (newV) {
-      this.newList = newV;
-      // this.newList = Array.from(newV);
-    },
-  },
-};
+});
 </script>
 <style scoped lang="css" rel="stylesheet/css">
 /* @import url(); 引入css类 */

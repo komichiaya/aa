@@ -194,91 +194,84 @@
       >
     </div>
   </div>
-  <div></div>
 </template>
 
 <script>
-import { mapState } from "vuex";
-export default {
+import {
+  computed,
+  defineComponent,
+  onMounted,
+  ref,
+  watch,
+  toRefs,
+  reactive,
+} from "vue";
+import { useStore } from "vuex";
+export default defineComponent({
   props: ["country"],
-
-  // props: {
-  //   country: {
-  //     type: String,
-  //   },
-  // },
-  data() {
-    return {
-      newCountry: "",
-    };
-  },
-  computed: {
-    ...mapState({
-      data: (state) => state.area.data,
-      cate: (state) => state.area.data.cate,
-      scenic: (state) => state.area.data.scenic,
-      information: (state) => state.area.data.information,
-    }),
-    newScenic() {
+  setup(props) {
+    const { country } = toRefs(props);
+    const store = useStore();
+    const data = computed(() => store.state.area.data);
+    const cate = computed(() => store.state.area.data.cate);
+    const scenic = computed(() => store.state.area.data.scenic);
+    const information = computed(() => store.state.area.data.information);
+    const newScenic = computed(() => {
       let newScenic = [];
-      const { scenic } = this;
-      if (scenic.length > 5) {
-        newScenic = scenic.slice(0, 5);
+      if (scenic.value.length > 5) {
+        newScenic = scenic.value.slice(0, 5);
         return newScenic;
       } else {
-        return scenic;
+        return scenic.value;
       }
-    },
-    leftCateArr() {
+    });
+    const leftCateArr = computed(() => {
       let leftCateArr = [];
-      const { cate } = this;
-      if (cate) {
-        leftCateArr = cate.slice(0, 4);
+      if (cate.value) {
+        leftCateArr = cate.value.slice(0, 4);
         return leftCateArr;
       }
-    },
-    rightCateArr() {
+    });
+    const rightCateArr = computed(() => {
       let rightCateArr = [];
-      const { cate } = this;
-      if (cate) {
-        rightCateArr = cate.slice(4, 8);
+      if (cate.value) {
+        rightCateArr = cate.value.slice(4, 8);
       }
       return rightCateArr;
-    },
-    newInforMation() {
+    });
+    const newInforMation = computed(() => {
       let newInforMation = [];
-      const { information } = this;
-      if (information.length > 4) {
-        newInforMation = information.slice(0, 4);
+      if (information.value.length > 4) {
+        newInforMation = information.value.slice(0, 4);
         return newInforMation;
       }
-      return information;
-    },
-    newData() {
-      let { data } = this;
-      return data;
-    },
-  },
-  watch: {
-    country: function (newValue) {
+      return information.value;
+    });
+    const newData = computed(() => {
+      return data.value;
+    });
+    watch(country, (newValue) => {
       if (newValue) {
-        this.newCountry = this.country;
+        newCountry.value = country.value;
       }
-    },
+    });
+    onMounted(() => {
+      store.dispatch("getCountry", country.value);
+    });
+
+    return reactive({
+      data,
+      cate,
+      scenic,
+      information,
+      newScenic,
+      leftCateArr,
+      rightCateArr,
+      newInforMation,
+      newData,
+    });
   },
-  methods: {
-    test() {
-      this.a++;
-    },
-  },
-  //生命周期 - 创建完成（访问当前this实例）
-  created() {},
-  //生命周期 - 挂载完成（访问DOM元素）
-  mounted() {
-    this.$store.dispatch("getCountry", this.country);
-    console.log("this.", this.country);
-  },
-};
+});
 </script>
 <style>
 p {

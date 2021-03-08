@@ -16,22 +16,25 @@
 import Footer from "./components/Footer/Footer";
 import Header from "./components/Header/Header";
 
-import { mapState } from "vuex";
-export default {
+import { useStore } from "vuex";
+import { computed, defineComponent, onMounted } from "vue";
+export default defineComponent({
   name: "app",
   components: {
     Footer,
     Header,
   },
-  computed: {
-    ...mapState({
-      list: (state) => state.main.data.topList,
-    }),
+  setup() {
+    const store = useStore();
+    const list = computed(() => store.state.main.data.topList);
+    onMounted(() => {
+      store.dispatch("getMain");
+    });
+    return {
+      list,
+    };
   },
-  mounted() {
-    this.$store.dispatch("getMain");
-  },
-};
+});
 </script>
 
 <style>

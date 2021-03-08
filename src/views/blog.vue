@@ -13,7 +13,15 @@
           </p>
         </div>
         <div class="col-lg-6 about-right text-lg-right mt-lg-0 mt-5">
-          <img :src="data.img_src" alt="" class="img-fluid abt-image" />
+          <img
+            :src="
+              data.img_src
+                ? data.img_src
+                : 'https://cfan.cc/tc/static/img/file.png'
+            "
+            alt=""
+            class="img-fluid abt-image"
+          />
         </div>
       </div>
     </div>
@@ -21,11 +29,12 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { useStore } from "vuex";
 import Header from "../components/Header/Header.vue";
 import BlogBanner from "../components/BlogBanner/BlogBanner.vue";
+import { defineComponent, reactive, computed, onMounted, toRefs } from "vue";
 
-export default {
+export default defineComponent({
   name: "blog",
   props: {
     country: {
@@ -42,27 +51,22 @@ export default {
     Header,
     BlogBanner,
   },
-  data() {
-    return {};
-  },
-  computed: {
-    ...mapState({
-      data: (state) => state.blog.data,
-      topBanner: (state) => state.area.data.topPic,
-    }),
-  },
-  //生命周期 - 创建完成（访问当前this实例）
-  created() {},
-  //生命周期 - 挂载完成（访问DOM元素）
-  mounted() {
-    this.$store.dispatch("getBlog", {
-      country: this.country,
-      which: this.which,
-      id: this.id,
+  setup(props) {
+    const { country, which, id } = toRefs(props);
+    const store = useStore();
+    const data = computed(() => store.state.blog.data);
+    const topBanner = computed(() => store.state.area.data.topPic);
+    onMounted(() => {
+      store.dispatch("getBlog", {
+        country: country.value,
+        which: which.value,
+        id: id.value,
+      });
+      store.dispatch("getCountry", country.value);
     });
-    this.$store.dispatch("getCountry", this.country);
+    return reactive({ data, topBanner });
   },
-};
+});
 </script>
 <style scoped lang="css" rel="stylesheet/css">
 /* @import url(); 引入css类 */

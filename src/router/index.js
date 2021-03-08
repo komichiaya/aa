@@ -1,38 +1,32 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-import { INDEX, AREA, BLOG, MORE } from "./path";
 import Blog from "@/views/blog";
 const routes = [
   {
     name: "index",
-    path: INDEX,
+    path: "/index",
     component: () => import("@/views/index"),
   },
   {
     name: "area",
-    path: AREA,
+    path: "/area/:country",
     props: true,
     component: () => import("@/views/area"),
     children: [],
   },
   {
     name: "Blog",
-    path: BLOG,
+    path: "/area/:country/blog/:which/:id",
     props: true,
     component: () => import("@/views/blog"),
   },
   {
     name: "More",
-    path: MORE,
+    path: "/area/:country/more/:which",
     props: true,
     component: () => import("@/views/more"),
-    children: [
-      {
-        path: "/:which/:id",
-        component: Blog,
-      },
-    ],
   },
+
   {
     path: "/",
     redirect: "/index",

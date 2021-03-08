@@ -58,35 +58,40 @@
 // import { Button, Table } from "view-design";
 // createApp().component("Button", Button);
 // createApp().component("Table", Table);
-import { mapState } from "vuex";
+import {
+  computed,
+  defineComponent,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+} from "vue";
+import { useStore } from "vuex";
 import TopBanner from "@/components/TopBanner/TopBanner";
 import Header from "@/components/Header/Header";
 
-export default {
+export default defineComponent({
   components: {
     TopBanner,
     Header,
   },
-  data() {
-    return {};
-  },
-  computed: {
-    ...mapState({
-      data: (state) => state.main.data.countryList,
-      list: (state) => state.main.data.topList,
-    }),
-  },
-  mounted() {
-   
-    this.$store.dispatch("getMain");
-    window.addEventListener("unload", () => {
-      //将最新的shopData存入sessionStorage
-      sessionStorage.setItem("list", JSON.stringify(this.list));
+  setup() {
+    const store = useStore();
+    const data = computed(() => store.state.main.data.countryList);
+    const list = computed(() => store.state.main.data.topList);
+    onMounted(() => {
+      store.dispatch("getMain");
+      window.addEventListener("unload", () => {
+        //将最新的shopData存入sessionStorage
+        sessionStorage.setItem("list", JSON.stringify(list.value));
+      });
     });
+    onBeforeUnmount(() => {
+      sessionStorage.setItem("list", JSON.stringify(list.value));
+    });
+    return {
+      data,
+      list,
+    };
   },
-
-  beforeUnmount() {
-    sessionStorage.setItem("list", JSON.stringify(this.list));
-  },
-};
+});
 </script>
